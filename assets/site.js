@@ -2,8 +2,8 @@
 
 /* Adresse e-mail qui reçoit les formulaires. Tant qu'elle est vide, les messages
    sont envoyés vers les messages Instagram de @hidden__radiance. */
-const HR_EMAIL = '';
-const HR_IG = 'hidden__radiance';
+const HR_EMAIL = 'hradiance.pro@gmail.com';
+const HR_IG = 'hidden___radiance';
 
 (function(){
   /* header: menu on phones, solid background once the page scrolls */
