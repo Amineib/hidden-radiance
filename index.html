@@ -38,8 +38,8 @@
 .m-track.drag{cursor:grabbing}
 .m-item{position:absolute;left:0;top:0;padding:0;border:0;background:var(--paper-2);transform-origin:0 0;will-change:transform;cursor:pointer;overflow:hidden}
 .m-item img{width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none;user-select:none}
-.m-item .m-tag{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);white-space:nowrap;font-family:var(--mono);font-size:1.15rem;background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:99px;opacity:0;transition:opacity .4s}
-.m-item.is-center .m-tag{opacity:1}
+.m-focus{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,8px);white-space:nowrap;font-family:var(--mono);font-size:.84rem;text-decoration:none;background:var(--paper);color:var(--ink);padding:11px 20px;border-radius:99px;box-shadow:0 12px 30px -12px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .4s, transform .4s}
+.m-focus.show{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 .m-cap{position:absolute;left:var(--gutter);bottom:clamp(28px,6vh,64px);max-width:min(560px,60vw);display:flex;flex-direction:column;gap:12px;align-items:flex-start;transition:opacity .35s, transform .35s}
 .m-cap.swap{opacity:0;transform:translateY(8px)}
 .m-cap .mono{color:var(--ink-2)}
@@ -175,6 +175,7 @@
 <main id="top">
   <section class="motion" aria-label="Projets en mouvement">
     <div class="m-track" id="mTrack" aria-label="Projets, glissez pour parcourir"></div>
+    <a class="m-focus" id="mFocus" href="collection.html" tabindex="-1">Explorer la collection <span class="arrow" aria-hidden="true">→</span></a>
     <div class="m-cap" id="mCap" aria-live="polite">
       <p class="mono"><span id="mcN">01</span> / 06 &nbsp;·&nbsp; <span id="mcSub">Collection Femme, Automne/Hiver 2024</span></p>
       <h1 id="mcTitle">Hidden Radiance</h1>
@@ -366,13 +367,13 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sec = document.querySelector('.motion'), track = document.getElementById('mTrack');
   const cap = document.getElementById('mCap'), cN = document.getElementById('mcN'), cSub = document.getElementById('mcSub'), cTitle = document.getElementById('mcTitle'), cCta = document.getElementById('mcCta'), cCtaT = document.getElementById('mcCtaT');
-  const order = Object.keys(PROJ);
+  const order = Object.keys(PROJ), focus = document.getElementById('mFocus');
   let hb, A, sig, gap, L, pos = [], els = [];
   // three copies of the strip so it never runs out
   for (let k=0;k<3;k++) ITEMS.forEach((it,i)=>{
     const b = document.createElement('button'); b.type = 'button'; b.className = 'm-item'; b.dataset.i = i;
     b.setAttribute('aria-label', PROJ[it.p].title + ', ' + PROJ[it.p].sub);
-    b.innerHTML = `<img src="${it.src}" alt="" ${k===1 && i<8 ? '' : 'loading="lazy"'} draggable="false">` + (it.p==='collection' ? '<span class="m-tag">Explorer la collection →</span>' : '');
+    b.innerHTML = `<img src="${it.src}" alt="" ${k===1 && i<8 ? '' : 'loading="lazy"'} draggable="false">` + '';
     track.appendChild(b); els.push({b, i, k});
   });
   function layout(){
@@ -380,6 +381,7 @@
     hb = Math.round(H*(phone ? .13 : .17)); A = phone ? 1.25 : 1.45; sig = phone ? W*.42 : Math.min(W*.26, 420); gap = phone ? 8 : 14;
     pos = []; let x = 0; ITEMS.forEach(it=>{ const w = hb*it.r; pos.push([x, w]); x += w + gap; }); L = x;
     els.forEach(o=>{ const w = pos[o.i][1]*(1+A), h = hb*(1+A); o.b.style.width = w+'px'; o.b.style.height = h+'px'; });
+    focus.style.top = (H*(phone ? .38 : .44) + hb*(1+A)/2 - (phone ? 58 : 70)) + 'px';
   }
   // screen x of strip coordinate u: the strip is magnified around its centre (a dock, as an integral)
   const erf = x=>{ const s = Math.sign(x); x = Math.abs(x); const t = 1/(1+.3275911*x); const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - .284496736)*t + .254829592)*t*Math.exp(-x*x); return s*y; };
@@ -401,7 +403,7 @@
       if (centerI && centerI.b) centerI.b.classList.remove('is-center');
       best.b.classList.add('is-center'); centerI = best;
       const p = ITEMS[best.i].p;
-      if (p !== lastP){ lastP = p; const P = PROJ[p];
+      if (p !== lastP){ lastP = p; const P = PROJ[p]; focus.classList.toggle('show', p === 'collection'); focus.tabIndex = p === 'collection' ? 0 : -1;
         cap.classList.add('swap');
         setTimeout(()=>{ cN.textContent = P.n; cSub.textContent = P.sub; cTitle.textContent = P.title; cCtaT.textContent = P.cta; cCta.href = P.href; cap.classList.remove('swap'); }, 220);
       }
